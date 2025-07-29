@@ -28,3 +28,28 @@
    ```
 
 5. 在`/backend`文件夹下运行 node server.js，启动后端
+
+## 3. API说明
+
+### 3.1 和stock相关的接口
+
+接口功能：负责从yahoo api获取数据
+
+```js
+// 获取某只股票30天的历史数据
+http://localhost:3000/api/historical/:symbol
+使用示例：http://localhost:3000/api/historical/AAPL
+
+// 获取某只股票的实时数据
+http://localhost:3000/api/real-time/:symbol
+使用示例：http://localhost:3000/api/real-time/AAPL
+
+// 批量获取多只股票的历史数据
+http://localhost:3000/api/historical
+使用示例：http://localhost:3000/api/historical?symbols=AAPL,GOOG
+
+// 批量获取多只股票的实时数据
+http://localhost:3000/api/real-time
+使用示例：http://localhost:3000/api/real-time?symbols=AAPL,GOOG
+```
+
