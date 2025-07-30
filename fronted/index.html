@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人股票投资组合管理</title>
+    <title>Personal Stock Portfolio Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -68,21 +68,21 @@
     </style>
 </head>
 <body class="p-4"> <div class="container mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">个人股票投资组合管理系统</h1> <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management System</h1> <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             <div class="lg:col-span-1 flex flex-col gap-4">
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">投资组合概览</h2> <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">现金余额</p> <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p> </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2> <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Cash Balance</p> <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p> </div>
                         <div class="bg-green-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">总资产价值</p> <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p> </div>
+                            <p class="text-xs text-gray-600">Total Asset Value</p> <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p> </div>
                         <div class="bg-purple-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">初始资金</p> <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p> </div>
+                            <p class="text-xs text-gray-600">Initial Capital</p> <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p> </div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-3">投资占比</h3> <div class="chart-container">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3> <div class="chart-container">
                         <canvas id="investmentAllocationChart"></canvas>
                     </div>
                 </div>
@@ -90,8 +90,8 @@
 
             <div class="lg:col-span-1 flex flex-col gap-4">
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">股票详情与历史数据</h2> <div class="flex items-center space-x-3 mb-3"> <input type="text" id="stockSymbolInput" placeholder="输入股票代码 (如: AAPL)" class="input-field flex-grow">
-                        <button id="fetchStockDataBtn" class="btn-primary">查询</button> </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Details & Historical Data</h2> <div class="flex items-center space-x-3 mb-3"> <input type="text" id="stockSymbolInput" placeholder="Enter stock symbol (e.g., AAPL)" class="input-field flex-grow">
+                        <button id="fetchStockDataBtn" class="btn-primary">Query</button> </div>
 
                     <div id="currentStockInfo" class="mb-3 bg-gray-50 p-3 rounded-lg shadow-sm hidden">
                         <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p> <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
@@ -103,10 +103,10 @@
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">历史价格走势</h3> <div class="flex space-x-2 mb-3">
-                        <button id="history7DaysBtn" class="btn-secondary">近7天</button>
-                        <button id="history1MonthBtn" class="btn-secondary">近1月</button>
-                        <button id="history2MonthsBtn" class="btn-secondary">近2月</button>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend</h3> <div class="flex space-x-2 mb-3">
+                        <button id="history7DaysBtn" class="btn-secondary">7 Days</button>
+                        <button id="history1MonthBtn" class="btn-secondary">1 Month</button>
+                        <button id="history2MonthsBtn" class="btn-secondary">2 Months</button>
                     </div>
                     <div class="chart-container">
                         <canvas id="stockHistoricalChart"></canvas>
@@ -116,31 +116,31 @@
 
             <div class="lg:col-span-1 flex flex-col gap-4">
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">交易股票</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">股票代码</label> <input type="text" id="tradeSymbol" placeholder="如: AAPL" class="input-field w-full">
+                            <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Stock Symbol</label> <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
                         </div>
                         <div>
-                            <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">数量</label> <input type="number" id="tradeQuantity" placeholder="数量" class="input-field w-full min-w-0">
+                            <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label> <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
                         </div>
                         <div class="md:col-span-2">
-                            <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">价格 (当前价格)</label> <input type="number" id="tradePrice" placeholder="价格" step="0.01" class="input-field w-full min-w-0">
+                            <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price (Current Price)</label> <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
                         </div>
                     </div>
-                    <div class="flex space-x-3"> <button id="buyStockBtn" class="btn-primary flex-grow">买入</button>
-                        <button id="sellStockBtn" class="btn-primary flex-grow bg-red-600 hover:bg-red-700">卖出</button>
+                    <div class="flex space-x-3"> <button id="buyStockBtn" class="btn-primary flex-grow">Buy</button>
+                        <button id="sellStockBtn" class="btn-primary flex-grow bg-red-600 hover:bg-red-700">Sell</button>
                     </div>
                     <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p> </div>
 
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">交易历史 (最新10笔)</h2> <div class="overflow-x-auto flex-grow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History (Latest 10)</h2> <div class="overflow-x-auto flex-grow">
                         <table class="min-w-full bg-white rounded-lg shadow-sm">
                             <thead>
-                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">交易日期</th>
-                                    <th class="py-2 px-3">股票代码</th>
-                                    <th class="py-2 px-3">类型</th>
-                                    <th class="py-2 px-3">数量</th>
-                                    <th class="py-2 px-3">价格</th>
+                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">Transaction Date</th>
+                                    <th class="py-2 px-3">Symbol</th>
+                                    <th class="py-2 px-3">Type</th>
+                                    <th class="py-2 px-3">Quantity</th>
+                                    <th class="py-2 px-3">Price</th>
                                 </tr>
                             </thead>
                             <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light"> </tbody>
@@ -148,15 +148,15 @@
                     </div>
                 </div>
             </div>
-        </div> <div class="card mt-4"> <h3 class="text-xl font-semibold text-gray-700 mb-3">股票持仓</h3> <div class="overflow-x-auto flex-grow">
+        </div> <div class="card mt-4"> <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3> <div class="overflow-x-auto flex-grow">
                 <table class="min-w-full bg-white rounded-lg shadow-sm">
                     <thead>
-                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">股票代码</th>
-                            <th class="py-2 px-3">数量</th>
-                            <th class="py-2 px-3">购买价格</th>
-                            <th class="py-2 px-3">当前价格</th>
-                            <th class="py-2 px-3">市值</th>
-                            <th class="py-2 px-3">盈亏</th>
+                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">Symbol</th>
+                            <th class="py-2 px-3">Quantity</th>
+                            <th class="py-2 px-3">Purchase Price</th>
+                            <th class="py-2 px-3">Current Price</th>
+                            <th class="py-2 px-3">Market Value</th>
+                            <th class="py-2 px-3">Profit/Loss</th>
                         </tr>
                     </thead>
                     <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light"> </tbody>
@@ -189,7 +189,7 @@
         // Utility function to format date
         const formatDate = (dateString) => {
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('zh-CN', options);
+            return new Date(dateString).toLocaleDateString('en-US', options);
         };
 
         // --- Portfolio Functions ---
@@ -251,7 +251,7 @@
                             `;
                         });
                     } else {
-                        holdingsTableBody.innerHTML = `<tr><td colspan="6" class="py-2 px-3 text-center text-gray-500">暂无持仓股票</td></tr>`;
+                        holdingsTableBody.innerHTML = `<tr><td colspan="6" class="py-2 px-3 text-center text-gray-500">No stock holdings</td></tr>`;
                     }
 
                     // Render investment allocation pie chart
@@ -288,7 +288,7 @@
                 ctx.fillStyle = '#6b7280'; // gray-500
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle'; // Center vertically
-                ctx.fillText('暂无投资占比数据', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                ctx.fillText('No investment allocation data', ctx.canvas.width / 2, ctx.canvas.height / 2);
                 return; // Exit if no data
             }
 
@@ -366,7 +366,7 @@
         // Fetches and displays current stock data and historical data
         async function fetchStockData(symbol, historyDays = 30) {
             if (!symbol) {
-                alert('请输入股票代码！');
+                alert('Please enter a stock symbol!');
                 return;
             }
 
@@ -408,11 +408,11 @@
                     const netChangeNum = parseFloat(dataToDisplay.netChange);
                     const changeClass = netChangeNum > 0 ? 'text-green-600' : (netChangeNum < 0 ? 'text-red-600' : 'text-gray-600');
 
-                    currentStockChange.textContent = `变化: ${dataToDisplay.netChange || 'N/A'} (${dataToDisplay.percentageChange || 'N/A'})`;
+                    currentStockChange.textContent = `Change: ${dataToDisplay.netChange || 'N/A'} (${dataToDisplay.percentageChange || 'N/A'})`;
                     currentStockChange.className = `text-sm ${changeClass}`;
 
-                    currentStockVolume.textContent = `成交量: ${dataToDisplay.volume || 'N/A'}`;
-                    currentMarketStatus.textContent = `市场状态: ${currentData.marketStatus || 'N/A'}`;
+                    currentStockVolume.textContent = `Volume: ${dataToDisplay.volume || 'N/A'}`;
+                    currentMarketStatus.textContent = `Market Status: ${currentData.marketStatus || 'N/A'}`;
 
 
                     // Auto-fill trade price
@@ -423,7 +423,7 @@
                 } else {
                     currentStockInfoDiv.classList.add('hidden');
                     console.error('Error fetching current stock data: No valid data to display or API response not OK.', currentData.message || 'Unknown error', 'Data received:', currentData);
-                    alert(`无法获取 ${symbol} 的实时数据。`);
+                    alert(`Unable to fetch real-time data for ${symbol}.`);
                 }
 
                 // Fetch historical data
@@ -437,12 +437,12 @@
                     renderStockHistoricalChart(historicalData, symbol);
                 } else {
                     console.error('Error fetching historical stock data:', historicalData.message || 'Unknown error');
-                    alert(`无法获取 ${symbol} 的历史数据。`);
+                    alert(`Unable to fetch historical data for ${symbol}.`);
                 }
 
             } catch (error) {
                 console.error('Error fetching stock data:', error);
-                alert('获取股票数据时发生错误。请检查股票代码或稍后再试。');
+                alert('An error occurred while fetching stock data. Please check the stock symbol or try again later.');
             }
         }
 
@@ -469,7 +469,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: `${symbol} 历史价格`,
+                        label: `${symbol} Historical Price`,
                         data: data,
                         borderColor: '#10B981', // Green-500
                         backgroundColor: 'rgba(16, 185, 129, 0.1)', // Light green
@@ -503,7 +503,7 @@
                         x: {
                             title: {
                                 display: true,
-                                text: '日期'
+                                text: 'Date'
                             },
                             grid: {
                                 display: false
@@ -512,7 +512,7 @@
                         y: {
                             title: {
                                 display: true,
-                                text: '价格'
+                                text: 'Price'
                             },
                             beginAtZero: false,
                             ticks: {
@@ -536,7 +536,7 @@
             const tradeMessage = document.getElementById('tradeMessage');
 
             if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0) {
-                tradeMessage.textContent = '请输入有效的股票代码、数量和价格。';
+                tradeMessage.textContent = 'Please enter a valid stock symbol, quantity, and price.';
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 return;
             }
@@ -552,18 +552,18 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    tradeMessage.textContent = `成功买入 ${quantity} 股 ${symbol}，新现金余额: ${formatCurrency(data.newCashBalance)}`;
+                    tradeMessage.textContent = `Successfully bought ${quantity} shares of ${symbol}, new cash balance: ${formatCurrency(data.newCashBalance)}`;
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
                     fetchTransactionsHistory();
                 } else {
-                    tradeMessage.textContent = `买入失败: ${data.message || '未知错误'}`;
+                    tradeMessage.textContent = `Purchase failed: ${data.message || 'Unknown error'}`;
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 }
             } catch (error) {
                 console.error('Error buying stock:', error);
-                tradeMessage.textContent = '买入股票时发生错误。';
+                tradeMessage.textContent = 'An error occurred while buying stock.';
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
             }
         }
@@ -576,7 +576,7 @@
             const tradeMessage = document.getElementById('tradeMessage');
 
             if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0) {
-                tradeMessage.textContent = '请输入有效的股票代码、数量和价格。';
+                tradeMessage.textContent = 'Please enter a valid stock symbol, quantity, and price.';
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 return;
             }
@@ -592,18 +592,18 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    tradeMessage.textContent = `成功卖出 ${quantity} 股 ${symbol}，新现金余额: ${formatCurrency(data.newCashBalance)}`;
+                    tradeMessage.textContent = `Successfully sold ${quantity} shares of ${symbol}, new cash balance: ${formatCurrency(data.newCashBalance)}`;
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
                     fetchTransactionsHistory();
                 } else {
-                    tradeMessage.textContent = `卖出失败: ${data.message || '未知错误'}`;
+                    tradeMessage.textContent = `Sale failed: ${data.message || 'Unknown error'}`;
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 }
             } catch (error) {
                 console.error('Error selling stock:', error);
-                tradeMessage.textContent = '卖出股票时发生错误。';
+                tradeMessage.textContent = 'An error occurred while selling stock.';
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
             }
         }
@@ -626,13 +626,13 @@
                         row.innerHTML = `
                             <td class="py-2 px-3 text-left">${formatDate(transaction.transaction_date)}</td>
                             <td class="py-2 px-3 text-left">${transaction.symbol}</td>
-                            <td class="py-2 px-3 text-left ${transaction.type === 'buy' ? 'text-red-600' : 'text-green-600'}">${transaction.type === 'buy' ? '买入' : '卖出'}</td>
+                            <td class="py-2 px-3 text-left ${transaction.type === 'buy' ? 'text-red-600' : 'text-green-600'}">${transaction.type === 'buy' ? 'Buy' : 'Sell'}</td>
                             <td class="py-2 px-3 text-left">${transaction.quantity}</td>
                             <td class="py-2 px-3 text-left">${formatCurrency(transaction.price)}</td>
                         `;
                     });
                 } else {
-                    transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">暂无交易记录</td></tr>`;
+                    transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history</td></tr>`;
                 }
             } catch (error) {
                 console.error('Error fetching transaction history:', error);
