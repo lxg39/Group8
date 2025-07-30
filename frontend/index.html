@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Stock Portfolio Management</title>
+    <title>Personal Stock Portfolio</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Datalabels plugin for pie chart percentages -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -67,43 +71,65 @@
         }
     </style>
 </head>
-<body class="p-4"> <div class="container mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management System</h1> <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<body class="p-4"> <!-- Reduced overall page padding -->
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management</h1> <!-- Shorter heading -->
 
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <!-- Column 1: Portfolio Overview -->
             <div class="lg:col-span-1 flex flex-col gap-4">
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2> <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Cash Balance</p> <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p> </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2> <!-- Shorter heading -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <!-- Reduced gap -->
+                        <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Cash Balance</p> <!-- Shorter text -->
+                            <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p> <!-- Added break-all -->
+                        </div>
                         <div class="bg-green-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Total Asset Value</p> <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p> </div>
+                            <p class="text-xs text-gray-600">Total Value</p> <!-- Shorter text -->
+                            <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p> <!-- Added break-all -->
+                        </div>
                         <div class="bg-purple-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Initial Capital</p> <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p> </div>
+                            <p class="text-xs text-gray-600">Initial Capital</p> <!-- Shorter text -->
+                            <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p> <!-- Added break-all -->
+                        </div>
                     </div>
                 </div>
 
+                <!-- Investment Allocation Pie Chart -->
                 <div class="card">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3> <div class="chart-container">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3> <!-- Shorter heading -->
+                    <div class="chart-container">
                         <canvas id="investmentAllocationChart"></canvas>
                     </div>
                 </div>
             </div>
 
+            <!-- Column 2: Stock Details & Historical Data -->
             <div class="lg:col-span-1 flex flex-col gap-4">
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Details & Historical Data</h2> <div class="flex items-center space-x-3 mb-3"> <input type="text" id="stockSymbolInput" placeholder="Enter stock symbol (e.g., AAPL)" class="input-field flex-grow">
-                        <button id="fetchStockDataBtn" class="btn-primary">Query</button> </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Info & History</h2> <!-- Shorter heading -->
+                    <div class="flex items-center space-x-3 mb-3"> <!-- Reduced space-x -->
+                        <input type="text" id="stockSymbolInput" placeholder="Enter stock symbol (e.g., AAPL)" class="input-field flex-grow">
+                        <button id="fetchStockDataBtn" class="btn-primary">Query</button> <!-- Shorter button text -->
+                    </div>
 
                     <div id="currentStockInfo" class="mb-3 bg-gray-50 p-3 rounded-lg shadow-sm hidden">
-                        <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p> <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
+                        <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p> <!-- Smaller text -->
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
                             <p class="text-xl font-bold text-gray-900" id="currentStockPrice"></p>
                             <p class="text-sm text-gray-600" id="currentStockChange"></p>
                         </div>
-                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs"> <p class="text-gray-600" id="currentStockVolume"></p>
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs"> <!-- Smaller text -->
+                            <p class="text-gray-600" id="currentStockVolume"></p>
                             <p class="text-gray-600" id="currentMarketStatus"></p>
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend</h3> <div class="flex space-x-2 mb-3">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend</h3> <!-- Shorter heading -->
+                    <div class="flex space-x-2 mb-3">
                         <button id="history7DaysBtn" class="btn-secondary">7 Days</button>
                         <button id="history1MonthBtn" class="btn-secondary">1 Month</button>
                         <button id="history2MonthsBtn" class="btn-secondary">2 Months</button>
@@ -114,52 +140,78 @@
                 </div>
             </div>
 
+            <!-- Column 3: Buy/Sell Stock & Transaction History -->
             <div class="lg:col-span-1 flex flex-col gap-4">
+                <!-- Buy/Sell Stock Section -->
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2> <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2> <!-- Shorter heading -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Stock Symbol</label> <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
+                            <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Symbol</label> <!-- Shorter text -->
+                            <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
                         </div>
                         <div>
-                            <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label> <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
+                            <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label> <!-- Shorter text -->
+                            <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
                         </div>
                         <div class="md:col-span-2">
-                            <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price (Current Price)</label> <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
+                            <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price</label> <!-- Shorter text -->
+                            <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
+                        </div>
+                        <!-- New: Date Picker for Trade -->
+                        <div class="md:col-span-2">
+                            <label for="tradeDate" class="block text-xs font-medium text-gray-700 mb-1">Trade Date</label>
+                            <input type="date" id="tradeDate" class="input-field w-full">
                         </div>
                     </div>
-                    <div class="flex space-x-3"> <button id="buyStockBtn" class="btn-primary flex-grow">Buy</button>
+                    <div class="flex space-x-3"> <!-- Reduced space-x -->
+                        <button id="buyStockBtn" class="btn-primary flex-grow">Buy</button>
                         <button id="sellStockBtn" class="btn-primary flex-grow bg-red-600 hover:bg-red-700">Sell</button>
                     </div>
-                    <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p> </div>
+                    <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p> <!-- Smaller text and margin -->
+                </div>
 
+                <!-- Transaction History Section -->
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History (Latest 10)</h2> <div class="overflow-x-auto flex-grow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History (Latest 10)</h2> <!-- Shorter heading -->
+                    <div class="overflow-x-auto flex-grow">
                         <table class="min-w-full bg-white rounded-lg shadow-sm">
                             <thead>
-                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">Transaction Date</th>
+                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <!-- Smaller text -->
+                                    <th class="py-2 px-3">Date</th>
                                     <th class="py-2 px-3">Symbol</th>
                                     <th class="py-2 px-3">Type</th>
-                                    <th class="py-2 px-3">Quantity</th>
+                                    <th class="py-2 px-3">Qty</th>
                                     <th class="py-2 px-3">Price</th>
                                 </tr>
                             </thead>
-                            <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light"> </tbody>
+                            <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light"> <!-- Smaller text -->
+                                <!-- Transaction history will be inserted here -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div> <div class="card mt-4"> <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3> <div class="overflow-x-auto flex-grow">
+        </div> <!-- End of Main Dashboard Grid -->
+
+        <!-- Stock Holdings List (Now below the 3 columns, full width) -->
+        <div class="card mt-4"> <!-- Added mt-4 for spacing -->
+            <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3> <!-- Shorter heading -->
+            <div class="overflow-x-auto flex-grow">
                 <table class="min-w-full bg-white rounded-lg shadow-sm">
                     <thead>
-                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <th class="py-2 px-3">Symbol</th>
+                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <!-- Smaller text -->
+                            <th class="py-2 px-3">Symbol</th>
                             <th class="py-2 px-3">Quantity</th>
                             <th class="py-2 px-3">Purchase Price</th>
                             <th class="py-2 px-3">Current Price</th>
                             <th class="py-2 px-3">Market Value</th>
-                            <th class="py-2 px-3">Profit/Loss</th>
+                            <th class="py-2 px-3">P/L</th>
                         </tr>
                     </thead>
-                    <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light"> </tbody>
+                    <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light"> <!-- Smaller text -->
+                        <!-- Stock holdings will be inserted here -->
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -189,7 +241,15 @@
         // Utility function to format date
         const formatDate = (dateString) => {
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('en-US', options);
+            return new Date(dateString).toLocaleDateString('en-US', options); // Changed to en-US for display
+        };
+
+        // Utility function to get YYYY-MM-DD format for date input
+        const getFormattedDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         };
 
         // --- Portfolio Functions ---
@@ -357,10 +417,6 @@
             });
         }
 
-        // Removed fetchPortfolioTrend and renderPortfolioTrendChart as per user request
-        // function fetchPortfolioTrend(days = 7) { ... }
-        // function renderPortfolioTrendChart(trendData) { ... }
-
         // --- Stock Data Functions ---
 
         // Fetches and displays current stock data and historical data
@@ -388,15 +444,11 @@
 
                 let dataToDisplay = {}; // Initialize to an empty object
 
-                // --- MODIFIED LOGIC START ---
                 if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
-                    // Prefer primaryData if it exists and is not empty, regardless of isRealTime flag
                     dataToDisplay = currentData.primaryData;
                 } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
-                    // Fallback to secondaryData if primaryData is not available/empty
                     dataToDisplay = currentData.secondaryData;
                 }
-                // --- MODIFIED LOGIC END ---
 
 
                 if (currentResponse.ok && Object.keys(dataToDisplay).length > 0) { // Check if dataToDisplay has properties
@@ -415,7 +467,7 @@
                     currentMarketStatus.textContent = `Market Status: ${currentData.marketStatus || 'N/A'}`;
 
 
-                    // Auto-fill trade price
+                    // Auto-fill trade price, parsing the currency string to a number
                     const tradePriceValue = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
                     document.getElementById('tradeSymbol').value = symbol;
                     document.getElementById('tradePrice').value = tradePriceValue;
@@ -429,12 +481,12 @@
                 // Fetch historical data
                 console.log(`Fetching historical data for: ${symbol}`);
                 const historicalResponse = await fetch(`${API_BASE_URL}/historical/${symbol}`);
-                console.log('Historical API Response:', historicalResponse);
+                console.log('Historical API Response:', historicalResponse); // Log raw response
                 const historicalData = await historicalResponse.json();
-                console.log('Historical API Data:', historicalData);
+                console.log('Historical API Data:', historicalData); // Log parsed data
 
-                if (historicalResponse.ok && historicalData && historicalData.length > 0) {
-                    renderStockHistoricalChart(historicalData, symbol);
+                if (historicalResponse.ok && historicalData && historicalData.length > 0) { // Check for array length
+                    renderStockHistoricalChart(historicalData, symbol); // Pass the array directly
                 } else {
                     console.error('Error fetching historical stock data:', historicalData.message || 'Unknown error');
                     alert(`Unable to fetch historical data for ${symbol}.`);
@@ -442,9 +494,43 @@
 
             } catch (error) {
                 console.error('Error fetching stock data:', error);
-                alert('An error occurred while fetching stock data. Please check the stock symbol or try again later.');
+                alert('Error fetching stock data. Check symbol or try again.');
             }
         }
+
+        // New function to fetch historical price for a specific date
+        async function getHistoricalPriceForDate(symbol, dateString) {
+            try {
+                // The backend's /historical/:symbol endpoint currently returns 30 days of data.
+                // We'll fetch that and then filter for the specific date.
+                // For a more robust solution, the backend's historical API should support date range queries.
+                const response = await fetch(`${API_BASE_URL}/historical/${symbol}`);
+                const historicalData = await response.json();
+
+                if (response.ok && historicalData && historicalData.length > 0) {
+                    const targetDate = new Date(dateString);
+                    // Find the data for the exact date or the closest preceding date
+                    const dataForDate = historicalData.find(p => {
+                        const pDate = new Date(p.timestamp_unix * 1000); // Convert Unix timestamp (seconds) to Date
+                        return pDate.toDateString() === targetDate.toDateString();
+                    });
+
+                    if (dataForDate && dataForDate.close !== null) {
+                        return parseFloat(dataForDate.close);
+                    } else {
+                        console.warn(`No historical close price found for ${symbol} on ${dateString}.`);
+                        return null; // No specific historical price for this date
+                    }
+                } else {
+                    console.error(`Failed to fetch historical data for ${symbol} for date ${dateString}.`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`Error fetching historical price for ${symbol} on ${dateString}:`, error);
+                return null;
+            }
+        }
+
 
         // Renders the stock historical line chart
         function renderStockHistoricalChart(prices, symbol) {
@@ -469,7 +555,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: `${symbol} Historical Price`,
+                        label: `${symbol} Historical Price`, // Shorter label
                         data: data,
                         borderColor: '#10B981', // Green-500
                         backgroundColor: 'rgba(16, 185, 129, 0.1)', // Light green
@@ -497,13 +583,16 @@
                                     return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
                                 }
                             }
+                        },
+                        datalabels: { // Added datalabels plugin for charts
+                            display: false, // Usually not desired for line charts
                         }
                     },
                     scales: {
                         x: {
                             title: {
                                 display: true,
-                                text: 'Date'
+                                text: 'Date' // Shorter text
                             },
                             grid: {
                                 display: false
@@ -512,7 +601,7 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Price'
+                                text: 'Price' // Shorter text
                             },
                             beginAtZero: false,
                             ticks: {
@@ -522,7 +611,8 @@
                             }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels] // Register the datalabels plugin
             });
         }
 
@@ -533,10 +623,11 @@
             const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
             const quantity = parseInt(document.getElementById('tradeQuantity').value);
             const price = parseFloat(document.getElementById('tradePrice').value);
+            const tradeDate = document.getElementById('tradeDate').value; // Get the selected date
             const tradeMessage = document.getElementById('tradeMessage');
 
-            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0) {
-                tradeMessage.textContent = 'Please enter a valid stock symbol, quantity, and price.';
+            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0 || !tradeDate) {
+                tradeMessage.textContent = 'Please enter valid stock symbol, quantity, price, and trade date.'; // Shorter message
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 return;
             }
@@ -547,23 +638,23 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ symbol, quantity, price }),
+                    body: JSON.stringify({ symbol, quantity, price, transactionDate: tradeDate }), // Pass transactionDate
                 });
                 const data = await response.json();
 
                 if (response.ok) {
-                    tradeMessage.textContent = `Successfully bought ${quantity} shares of ${symbol}, new cash balance: ${formatCurrency(data.newCashBalance)}`;
+                    tradeMessage.textContent = `Bought ${quantity} ${symbol}. New cash: ${formatCurrency(data.newCashBalance)}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
                     fetchTransactionsHistory();
                 } else {
-                    tradeMessage.textContent = `Purchase failed: ${data.message || 'Unknown error'}`;
+                    tradeMessage.textContent = `Buy failed: ${data.message || 'Unknown error'}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 }
             } catch (error) {
                 console.error('Error buying stock:', error);
-                tradeMessage.textContent = 'An error occurred while buying stock.';
+                tradeMessage.textContent = 'Error buying stock.'; // Shorter message
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
             }
         }
@@ -573,10 +664,11 @@
             const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
             const quantity = parseInt(document.getElementById('tradeQuantity').value);
             const price = parseFloat(document.getElementById('tradePrice').value);
+            const tradeDate = document.getElementById('tradeDate').value; // Get the selected date
             const tradeMessage = document.getElementById('tradeMessage');
 
-            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0) {
-                tradeMessage.textContent = 'Please enter a valid stock symbol, quantity, and price.';
+            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0 || !tradeDate) {
+                tradeMessage.textContent = 'Please enter valid stock symbol, quantity, price, and trade date.'; // Shorter message
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 return;
             }
@@ -587,23 +679,23 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ symbol, quantity, price }),
+                    body: JSON.stringify({ symbol, quantity, price, transactionDate: tradeDate }), // Pass transactionDate
                 });
                 const data = await response.json();
 
                 if (response.ok) {
-                    tradeMessage.textContent = `Successfully sold ${quantity} shares of ${symbol}, new cash balance: ${formatCurrency(data.newCashBalance)}`;
+                    tradeMessage.textContent = `Sold ${quantity} ${symbol}. New cash: ${formatCurrency(data.newCashBalance)}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
                     fetchTransactionsHistory();
                 } else {
-                    tradeMessage.textContent = `Sale failed: ${data.message || 'Unknown error'}`;
+                    tradeMessage.textContent = `Sell failed: ${data.message || 'Unknown error'}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
                 }
             } catch (error) {
                 console.error('Error selling stock:', error);
-                tradeMessage.textContent = 'An error occurred while selling stock.';
+                tradeMessage.textContent = 'Error selling stock.'; // Shorter message
                 tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
             }
         }
@@ -647,7 +739,10 @@
             // Fetch initial data
             fetchPortfolioOverview();
             fetchTransactionsHistory();
-            // fetchPortfolioTrend(7); // Removed as per user request
+
+            // Set default trade date to today
+            const today = new Date();
+            document.getElementById('tradeDate').value = getFormattedDate(today);
 
             // Stock Data Section
             document.getElementById('fetchStockDataBtn').addEventListener('click', () => {
@@ -664,25 +759,71 @@
             // Historical data buttons
             document.getElementById('history7DaysBtn').addEventListener('click', () => {
                 const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                // Note: Backend currently only supports 'limit: 30' for historical data,
-                // so these buttons will all fetch the same 30-day data for now.
-                // In a real app, you'd adjust the 'limit' parameter based on the button clicked.
-                fetchStockData(symbol, 7);
+                fetchStockData(symbol, 7); // Pass 7 days limit
             });
             document.getElementById('history1MonthBtn').addEventListener('click', () => {
                 const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 30);
+                fetchStockData(symbol, 30); // Pass 30 days limit
             });
             document.getElementById('history2MonthsBtn').addEventListener('click', () => {
                 const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 60);
+                fetchStockData(symbol, 60); // Pass 60 days limit
             });
 
+            // Event listener for trade date change
+            document.getElementById('tradeDate').addEventListener('change', async () => {
+                const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+                const selectedDate = document.getElementById('tradeDate').value;
 
-            // Portfolio Trend Section buttons are removed from HTML, but keeping functions for now if needed elsewhere
-            // document.getElementById('trend7DaysBtn').addEventListener('click', () => fetchPortfolioTrend(7));
-            // document.getElementById('trend1MonthBtn').addEventListener('click', () => fetchPortfolioTrend(30));
-            // document.getElementById('trend2MonthsBtn').addEventListener('click', () => fetchPortfolioTrend(60));
+                if (symbol && selectedDate) {
+                    const historicalPrice = await getHistoricalPriceForDate(symbol, selectedDate);
+                    if (historicalPrice !== null) {
+                        document.getElementById('tradePrice').value = historicalPrice.toFixed(2);
+                    } else {
+                        // If historical price not found, try to get current price as fallback
+                        const currentResponse = await fetch(`${API_BASE_URL}/real-time/${symbol}`);
+                        const currentData = await currentResponse.json();
+                        let dataToDisplay = {};
+                        if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
+                            dataToDisplay = currentData.primaryData;
+                        } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
+                            dataToDisplay = currentData.secondaryData;
+                        }
+                        const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
+                        document.getElementById('tradePrice').value = currentPrice || '';
+                        if (!currentPrice) {
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`); // Shorter message
+                        }
+                    }
+                }
+            });
+
+            // Event listener for trade symbol change to update price for selected date
+            document.getElementById('tradeSymbol').addEventListener('change', async () => {
+                const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+                const selectedDate = document.getElementById('tradeDate').value;
+                if (symbol && selectedDate) {
+                    const historicalPrice = await getHistoricalPriceForDate(symbol, selectedDate);
+                    if (historicalPrice !== null) {
+                        document.getElementById('tradePrice').value = historicalPrice.toFixed(2);
+                    } else {
+                        // If historical price not found, try to get current price as fallback
+                        const currentResponse = await fetch(`${API_BASE_URL}/real-time/${symbol}`);
+                        const currentData = await currentResponse.json();
+                        let dataToDisplay = {};
+                        if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
+                            dataToDisplay = currentData.primaryData;
+                        } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
+                            dataToDisplay = currentData.secondaryData;
+                        }
+                        const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
+                        document.getElementById('tradePrice').value = currentPrice || '';
+                        if (!currentPrice) {
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`); // Shorter message
+                        }
+                    }
+                }
+            });
 
 
             // Buy/Sell Stock Section

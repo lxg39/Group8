@@ -26,10 +26,10 @@ const updatePortfolioValue = async (portfolioId, newCashBalance, newTotalValue) 
 };
 
 // Transaction Management
-const recordTransaction = async (portfolioId, symbol, type, quantity, price) => {
+const recordTransaction = async (portfolioId, symbol, type, quantity, price, transactionDate = null) => {
     const [result] = await pool.execute(
-        'INSERT INTO transactions (portfolio_id, symbol, type, quantity, price) VALUES (?, ?, ?, ?, ?)',
-        [portfolioId, symbol, type, quantity, price]
+        'INSERT INTO transactions (portfolio_id, symbol, type, quantity, price, transaction_date) VALUES (?, ?, ?, ?, ?, ?)',
+        [portfolioId, symbol, type, quantity, price, transactionDate]
     );
     return result.insertId;
 };
