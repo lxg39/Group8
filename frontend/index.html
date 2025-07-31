@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Stock Portfolio</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Datalabels plugin for pie chart percentages -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -22,27 +18,34 @@
             border-radius: 0.75rem; /* rounded-xl */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
             padding: 1rem; /* p-4 */
-            margin-bottom: 1rem; /* mb-4 */
-            height: 100%; /* Ensure cards take full height in grid cells */
-            display: flex;
-            flex-direction: column;
-        }
-        .card-content {
-            flex-grow: 1; /* Allow content to grow and fill space */
+            /* margin-bottom: 1rem; */ /* mb-4 - removed as parent gap will handle spacing */
             display: flex;
             flex-direction: column;
         }
         .chart-container {
             flex-grow: 1; /* Allow chart to take available space */
             position: relative;
-            height: 100%; /* Ensure chart container fills parent height */
             min-height: 200px; /* Adjusted minimum height for charts */
         }
         .btn-primary {
-            @apply bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 ease-in-out text-sm; /* Smaller text for buttons */
+            /* 调整 query 按钮颜色，使其更清晰 */
+            @apply bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition duration-200 ease-in-out text-sm;
         }
+        /* 修改 Buy 和 Sell 按钮的样式 */
+        .btn-buy {
+            @apply bg-blue-200 text-blue-900 px-4 py-2 rounded-md hover:bg-blue-300 transition duration-200 ease-in-out text-sm font-semibold; /* 加粗文字 */
+        }
+        .btn-sell {
+            @apply bg-red-200 text-red-900 px-4 py-2 rounded-md hover:bg-red-300 transition duration-200 ease-in-out text-sm font-semibold; /* 加粗文字 */
+        }
+
         .btn-secondary {
-            @apply bg-gray-200 text-gray-800 px-3 py-1 rounded-md hover:bg-gray-300 transition duration-200 ease-in-out text-sm; /* Smaller text for buttons */
+            /* 修改 Today, 7 Days, 1 Month, All 按钮的非活跃颜色 */
+            @apply bg-gray-100 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 transition duration-200 ease-in-out text-sm;
+        }
+        .btn-historical-active {
+            /* 修改 Today, 7 Days, 1 Month, All 按钮的活跃颜色 */
+            @apply bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition duration-200 ease-in-out text-sm;
         }
         .input-field {
             @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm; /* Smaller text for inputs */
@@ -62,160 +65,186 @@
         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        /* Adjust table cell padding for compactness */
-        .min-w-full th, .min-w-full td {
-            padding-top: 0.5rem; /* py-2 */
-            padding-bottom: 0.5rem; /* py-2 */
-            padding-left: 0.75rem; /* px-3 */
-            padding-right: 0.75rem; /* px-3 */
+        /* Adjust table cell padding and font for larger text */
+        .min-w-full th {
+            padding-top: 0.75rem; /* py-3 */
+            padding-bottom: 0.75rem; /* py-3 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .min-w-full td {
+            padding-top: 0.625rem; /* py-2.5 */
+            padding-bottom: 0.625rem; /* py-2.5 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        /* For images and names at the bottom */
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .team-member img {
+            width: 80px; /* 加大图片尺寸 */
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem; /* 增加与名字的距离 */
+            border: 3px solid #cbd5e1; /* 稍微粗一点的边框 */
+        }
+        .team-member p {
+            font-size: 1rem; /* 调整名字的字体大小 */
+            font-weight: 600; /* semi-bold */
+            color: #374151; /* gray-800 */
         }
     </style>
 </head>
-<body class="p-4"> <!-- Reduced overall page padding -->
+<body class="p-4">
     <div class="container mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management</h1> <!-- Shorter heading -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management</h1>
 
-        <!-- Main Dashboard Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-            <!-- Column 1: Portfolio Overview -->
-            <div class="lg:col-span-1 flex flex-col gap-4">
-                <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2> <!-- Shorter heading -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <!-- Reduced gap -->
-                        <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Cash Balance</p> <!-- Shorter text -->
-                            <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p> <!-- Added break-all -->
-                        </div>
-                        <div class="bg-green-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Total Value</p> <!-- Shorter text -->
-                            <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p> <!-- Added break-all -->
-                        </div>
-                        <div class="bg-purple-50 p-3 rounded-lg shadow-sm">
-                            <p class="text-xs text-gray-600">Initial Capital</p> <!-- Shorter text -->
-                            <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p> <!-- Added break-all -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Investment Allocation Pie Chart -->
-                <div class="card">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3> <!-- Shorter heading -->
-                    <div class="chart-container">
-                        <canvas id="investmentAllocationChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Column 2: Stock Details & Historical Data -->
-            <div class="lg:col-span-1 flex flex-col gap-4">
-                <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Info & History</h2> <!-- Shorter heading -->
-                    <div class="flex items-center space-x-3 mb-3"> <!-- Reduced space-x -->
+            <div class="lg:col-span-1 lg:row-span-3 flex flex-col gap-4">
+                <div class="card h-full"> <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Info & History</h2>
+                    <div class="flex items-center space-x-3 mb-3">
                         <input type="text" id="stockSymbolInput" placeholder="Enter stock symbol (e.g., AAPL)" class="input-field flex-grow">
-                        <button id="fetchStockDataBtn" class="btn-primary">Query</button> <!-- Shorter button text -->
+                        <button id="fetchStockDataBtn" class="btn-primary">Query</button>
                     </div>
 
                     <div id="currentStockInfo" class="mb-3 bg-gray-50 p-3 rounded-lg shadow-sm hidden">
-                        <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p> <!-- Smaller text -->
+                        <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p>
                         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
                             <p class="text-xl font-bold text-gray-900" id="currentStockPrice"></p>
                             <p class="text-sm text-gray-600" id="currentStockChange"></p>
                         </div>
-                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs"> <!-- Smaller text -->
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
                             <p class="text-gray-600" id="currentStockVolume"></p>
                             <p class="text-gray-600" id="currentMarketStatus"></p>
                         </div>
                     </div>
 
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend</h3> <!-- Shorter heading -->
-                    <div class="flex space-x-2 mb-3">
-                        <button id="history7DaysBtn" class="btn-secondary">7 Days</button>
-                        <button id="history1MonthBtn" class="btn-secondary">1 Month</button>
-                        <button id="history2MonthsBtn" class="btn-secondary">2 Months</button>
-                    </div>
-                    <div class="chart-container">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend (1 Month)</h3> <div class="chart-container">
                         <canvas id="stockHistoricalChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Column 3: Buy/Sell Stock & Transaction History -->
-            <div class="lg:col-span-1 flex flex-col gap-4">
-                <!-- Buy/Sell Stock Section -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2> <!-- Shorter heading -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Symbol</label> <!-- Shorter text -->
-                            <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Cash Balance</p>
+                            <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p>
                         </div>
-                        <div>
-                            <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label> <!-- Shorter text -->
-                            <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
+                        <div class="bg-green-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Stock Value</p>
+                            <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p>
                         </div>
-                        <div class="md:col-span-2">
-                            <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price</label> <!-- Shorter text -->
-                            <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
-                        </div>
-                        <!-- New: Date Picker for Trade -->
-                        <div class="md:col-span-2">
-                            <label for="tradeDate" class="block text-xs font-medium text-gray-700 mb-1">Trade Date</label>
-                            <input type="date" id="tradeDate" class="input-field w-full">
+                        <div class="bg-purple-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Total Asset</p>
+                            <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p>
                         </div>
                     </div>
-                    <div class="flex space-x-3"> <!-- Reduced space-x -->
-                        <button id="buyStockBtn" class="btn-primary flex-grow">Buy</button>
-                        <button id="sellStockBtn" class="btn-primary flex-grow bg-red-600 hover:bg-red-700">Sell</button>
-                    </div>
-                    <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p> <!-- Smaller text and margin -->
                 </div>
 
-                <!-- Transaction History Section -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card col-span-1">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2>
+                        <div class="grid grid-cols-1 gap-3 mb-3"> <div>
+                                <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Symbol</label>
+                                <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
+                            </div>
+                            <div>
+                                <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                                <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
+                            </div>
+                            <div> <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price</label>
+                                <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
+                            </div>
+                            <div>
+                                <label for="tradeDate" class="block text-xs font-medium text-gray-700 mb-1">Trade Date</label>
+                                <input type="date" id="tradeDate" class="input-field w-full">
+                            </div>
+                        </div>
+                        <div class="flex space-x-3 mt-auto"> <button id="buyStockBtn" class="btn-buy flex-grow">Buy</button>
+                            <button id="sellStockBtn" class="btn-sell flex-grow">Sell</button>
+                        </div>
+                        <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p>
+                    </div>
+
+                    <div class="card col-span-1">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3>
+                        <div class="chart-container">
+                            <canvas id="investmentAllocationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History (Latest 10)</h2> <!-- Shorter heading -->
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3>
                     <div class="overflow-x-auto flex-grow">
                         <table class="min-w-full bg-white rounded-lg shadow-sm">
                             <thead>
-                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <!-- Smaller text -->
-                                    <th class="py-2 px-3">Date</th>
+                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
                                     <th class="py-2 px-3">Symbol</th>
-                                    <th class="py-2 px-3">Type</th>
-                                    <th class="py-2 px-3">Qty</th>
-                                    <th class="py-2 px-3">Price</th>
+                                    <th class="py-2 px-3">Quantity</th>
+                                    <th class="py-2 px-3">Purchase Price</th>
+                                    <th class="py-2 px-3">Current Price</th>
+                                    <th class="py-2 px-3">Market Value</th>
+                                    <th class="py-2 px-3">P/L</th>
                                 </tr>
                             </thead>
-                            <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light"> <!-- Smaller text -->
-                                <!-- Transaction history will be inserted here -->
-                            </tbody>
+                            <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light">
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div> <!-- End of Main Dashboard Grid -->
-
-        <!-- Stock Holdings List (Now below the 3 columns, full width) -->
-        <div class="card mt-4"> <!-- Added mt-4 for spacing -->
-            <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3> <!-- Shorter heading -->
+        </div> <div class="card mt-4">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History</h2>
+            <div class="flex space-x-2 mb-3">
+                <button id="transactionsTodayBtn" class="btn-secondary transaction-period-btn">Today</button>
+                <button id="transactions7DaysBtn" class="btn-secondary transaction-period-btn">7 Days</button>
+                <button id="transactions1MonthBtn" class="btn-secondary transaction-period-btn">1 Month</button>
+                <button id="transactionsAllBtn" class="btn-historical-active transaction-period-btn">All</button>
+            </div>
             <div class="overflow-x-auto flex-grow">
                 <table class="min-w-full bg-white rounded-lg shadow-sm">
                     <thead>
-                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal"> <!-- Smaller text -->
+                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
+                            <th class="py-2 px-3">Date</th>
                             <th class="py-2 px-3">Symbol</th>
-                            <th class="py-2 px-3">Quantity</th>
-                            <th class="py-2 px-3">Purchase Price</th>
-                            <th class="py-2 px-3">Current Price</th>
-                            <th class="py-2 px-3">Market Value</th>
-                            <th class="py-2 px-3">P/L</th>
+                            <th class="py-2 px-3">Type</th>
+                            <th class="py-2 px-3">Qty</th>
+                            <th class="py-2 px-3">Price</th>
                         </tr>
                     </thead>
-                    <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light"> <!-- Smaller text -->
-                        <!-- Stock holdings will be inserted here -->
-                    </tbody>
+                    <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light">
+                        </tbody>
                 </table>
             </div>
         </div>
-
+    </div> <div class="max-w-7xl mx-auto flex justify-evenly items-center py-3 mt-6 mb-4"> <div class="team-member">
+            <img src="img/Eloise.jpg" alt="Avatar A">
+            <p>Eloise Ma</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Eric.jpg" alt="Avatar B">
+            <p>Eric Yao</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Melody.png" alt="Avatar C">
+            <p>Melody Liu</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Bling.jpg" alt="Avatar D">
+            <p>Jing Jing Shang</p>
+        </div>
     </div>
 
     <script>
@@ -225,7 +254,9 @@
         // Chart instances
         let stockHistoricalChart;
         let investmentAllocationChart;
-        // let portfolioTrendChart; // Removed as per user request
+
+        // Global variable to store ALL fetched transactions for client-side filtering
+        let allTransactions = [];
 
         // Utility function to format currency
         const formatCurrency = (value) => {
@@ -290,9 +321,21 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    // 计算所有股票持仓的市场总值
+                    let totalStockMarketValue = 0;
+                    if (data.holdings && data.holdings.length > 0) {
+                        totalStockMarketValue = data.holdings.reduce((sum, holding) => sum + holding.marketValue, 0);
+                    }
+
+                    // 更新 Cash Balance (现金余额) - 保持不变
                     document.getElementById('cashBalance').textContent = formatCurrency(data.cash_balance);
-                    document.getElementById('totalValue').textContent = formatCurrency(data.total_value);
-                    document.getElementById('initialCash').textContent = formatCurrency(data.initial_cash);
+
+                    // 更新 Stock Value (股票总价值) 为所有股票的市场总值
+                    document.getElementById('totalValue').textContent = formatCurrency(totalStockMarketValue);
+
+                    // 更新 Total Asset (总资产) 为当前现金余额 + 所有股票的市场总值 (即当前投资组合总值)
+                    const currentPortfolioTotalValue = Number(data.cash_balance) + Number(totalStockMarketValue);
+                    document.getElementById('initialCash').textContent = formatCurrency(currentPortfolioTotalValue);
 
                     // Update stock holdings table
                     const holdingsTableBody = document.getElementById('stockHoldingsTableBody');
@@ -356,12 +399,18 @@
             const values = allocationData.map(item => item.value);
             const percentages = allocationData.map(item => item.percentage.toFixed(2) + '%');
 
-            // Generate a consistent set of colors
-            const backgroundColors = [
-                '#4299E1', '#667EEA', '#805AD5', '#D53F8C', '#DD6B20', '#38B2AC', '#48BB78', '#ECC94B', '#ED8936', '#9F7AEA'
-            ];
-            const borderColors = [
-                '#3182CE', '#5A67D8', '#6B46C1', '#B83280', '#C05621', '#2C7A7B', '#38A169', '#D69E2E', '#D97706', '#805AD5'
+            // 莫兰迪色系
+            const morandiColors = [
+                '#B0C4DE', // Light Steel Blue
+                '#ADD8E6', // Light Blue
+                '#98FB98', // Pale Green
+                '#F0E68C', // Khaki
+                '#FFC0CB', // Pink
+                '#DDA0DD', // Plum
+                '#C8A2C8', // Thistle
+                '#DAA520', // Goldenrod
+                '#E6E6FA', // Lavender
+                '#F5DEB3'  // Wheat
             ];
 
             investmentAllocationChart = new Chart(ctx, {
@@ -370,8 +419,14 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: backgroundColors.slice(0, labels.length),
-                        borderColor: borderColors.slice(0, labels.length),
+                        backgroundColor: morandiColors.slice(0, labels.length),
+                        borderColor: morandiColors.slice(0, labels.length).map(color => {
+                            // Slightly darker border for contrast
+                            const r = parseInt(color.slice(1, 3), 16);
+                            const g = parseInt(color.slice(3, 5), 16);
+                            const b = parseInt(color.slice(5, 7), 16);
+                            return `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 30)}, ${Math.max(0, b - 30)})`;
+                        }),
                         borderWidth: 1
                     }]
                 },
@@ -420,7 +475,7 @@
         // --- Stock Data Functions ---
 
         // Fetches and displays current stock data and historical data
-        async function fetchStockData(symbol, historyDays = 30) {
+        async function fetchStockData(symbol) { // Removed period parameter as it's now fixed to 1M
             if (!symbol) {
                 alert('Please enter a stock symbol!');
                 return;
@@ -478,9 +533,9 @@
                     alert(`Unable to fetch real-time data for ${symbol}.`);
                 }
 
-                // Fetch historical data
-                console.log(`Fetching historical data for: ${symbol}`);
-                const historicalResponse = await fetch(`${API_BASE_URL}/historical/${symbol}`);
+                // Fetch historical data (always '1M' as per new requirement)
+                console.log(`Fetching historical data for: ${symbol}, period: 1M (default)`);
+                const historicalResponse = await fetch(`${API_BASE_URL}/historical/${symbol}?period=1M`); // Always request 1M
                 console.log('Historical API Response:', historicalResponse); // Log raw response
                 const historicalData = await historicalResponse.json();
                 console.log('Historical API Data:', historicalData); // Log parsed data
@@ -489,7 +544,7 @@
                     renderStockHistoricalChart(historicalData, symbol); // Pass the array directly
                 } else {
                     console.error('Error fetching historical stock data:', historicalData.message || 'Unknown error');
-                    alert(`Unable to fetch historical data for ${symbol}.`);
+                    alert(`Unable to fetch historical data for ${symbol} for 1 Month.`);
                 }
 
             } catch (error) {
@@ -501,10 +556,8 @@
         // New function to fetch historical price for a specific date
         async function getHistoricalPriceForDate(symbol, dateString) {
             try {
-                // The backend's /historical/:symbol endpoint currently returns 30 days of data.
-                // We'll fetch that and then filter for the specific date.
-                // For a more robust solution, the backend's historical API should support date range queries.
-                const response = await fetch(`${API_BASE_URL}/historical/${symbol}`);
+                // For trade date price, we will fetch '1m' and filter locally to ensure enough data coverage
+                const response = await fetch(`${API_BASE_URL}/historical/${symbol}?period=1M`);
                 const historicalData = await response.json();
 
                 if (response.ok && historicalData && historicalData.length > 0) {
@@ -587,29 +640,6 @@
                         datalabels: { // Added datalabels plugin for charts
                             display: false, // Usually not desired for line charts
                         }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Date' // Shorter text
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Price' // Shorter text
-                            },
-                            beginAtZero: false,
-                            ticks: {
-                                callback: function(value) {
-                                    return formatCurrency(value);
-                                }
-                            }
-                        }
                     }
                 },
                 plugins: [ChartDataLabels] // Register the datalabels plugin
@@ -647,7 +677,10 @@
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
-                    fetchTransactionsHistory();
+                    // After a trade, re-fetch all transactions and then display the default view
+                    await fetchAndStoreAllTransactions();
+                    filterAndDisplayTransactions('all'); // Display 'All' transactions after a trade
+                    setActiveTransactionButton('transactionsAllBtn');
                 } else {
                     tradeMessage.textContent = `Buy failed: ${data.message || 'Unknown error'}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
@@ -688,7 +721,10 @@
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
                     // Refresh portfolio and transactions
                     fetchPortfolioOverview();
-                    fetchTransactionsHistory();
+                    // After a trade, re-fetch all transactions and then display the default view
+                    await fetchAndStoreAllTransactions();
+                    filterAndDisplayTransactions('all'); // Display 'All' transactions after a trade
+                    setActiveTransactionButton('transactionsAllBtn');
                 } else {
                     tradeMessage.textContent = `Sell failed: ${data.message || 'Unknown error'}`; // Shorter message
                     tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
@@ -700,19 +736,64 @@
             }
         }
 
-        // Fetches and displays transaction history
-        async function fetchTransactionsHistory() {
+        // Fetches ALL transaction history and stores it in allTransactions array
+        async function fetchAndStoreAllTransactions() {
             try {
                 const response = await fetch(`${API_BASE_URL}/portfolio/transactions`);
                 const data = await response.json();
 
-                const transactionHistoryTableBody = document.getElementById('transactionHistoryTableBody');
-                transactionHistoryTableBody.innerHTML = ''; // Clear previous data
+                if (response.ok && data) {
+                    allTransactions = data; // Store all transactions
+                } else {
+                    allTransactions = []; // Clear if error or no data
+                    console.error('Error fetching all transaction history:', data.message || 'Unknown error');
+                }
+            } catch (error) {
+                allTransactions = []; // Clear if error
+                console.error('Error fetching all transaction history:', error);
+            }
+        }
 
-                if (response.ok && data && data.length > 0) {
-                    // Limit to the latest 10 transactions
-                    const latestTransactions = data.slice(0, 10);
-                    latestTransactions.forEach(transaction => {
+        // Filters and displays transactions based on the period
+        function filterAndDisplayTransactions(period) {
+            const transactionHistoryTableBody = document.getElementById('transactionHistoryTableBody');
+            transactionHistoryTableBody.innerHTML = ''; // Clear previous data
+
+            let filteredTransactions = [];
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Normalize 'now' to start of day
+
+            if (allTransactions && allTransactions.length > 0) {
+                filteredTransactions = allTransactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.transaction_date);
+                    transactionDate.setHours(0, 0, 0, 0); // Normalize transaction date to start of day
+
+                    switch (period) {
+                        case 'today':
+                            return transactionDate.getTime() === now.getTime();
+                        case '7D':
+                            const sevenDaysAgo = new Date(now);
+                            sevenDaysAgo.setDate(now.getDate() - 7);
+                            return transactionDate.getTime() >= sevenDaysAgo.getTime() && transactionDate.getTime() <= now.getTime();
+                        case '1M':
+                            const oneMonthAgo = new Date(now);
+                            oneMonthAgo.setMonth(now.getMonth() - 1);
+                            return transactionDate.getTime() >= oneMonthAgo.getTime() && transactionDate.getTime() <= now.getTime();
+                        case 'all':
+                        default:
+                            return true; // No filter, return all
+                    }
+                });
+
+                // Sort filtered transactions by date descending (newest first)
+                filteredTransactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+
+                // Optionally, limit to latest 10 of the filtered results (keeping this commented out to show all filtered)
+                // const transactionsToDisplay = filteredTransactions.slice(0, 10);
+                const transactionsToDisplay = filteredTransactions; // Display all filtered transactions
+
+                if (transactionsToDisplay.length > 0) {
+                    transactionsToDisplay.forEach(transaction => {
                         const row = transactionHistoryTableBody.insertRow();
                         row.className = 'border-b border-gray-200 hover:bg-gray-50';
                         row.innerHTML = `
@@ -724,12 +805,27 @@
                         `;
                     });
                 } else {
-                    transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history</td></tr>`;
+                    transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history for this period</td></tr>`;
                 }
-            } catch (error) {
-                console.error('Error fetching transaction history:', error);
+            } else {
+                 transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history available</td></tr>`;
             }
         }
+
+        // Helper function to set active button for transaction history
+        function setActiveTransactionButton(activeButtonId) {
+            const buttons = document.querySelectorAll('.transaction-period-btn');
+            buttons.forEach(button => {
+                if (button.id === activeButtonId) {
+                    button.classList.add('btn-historical-active');
+                    button.classList.remove('btn-secondary');
+                } else {
+                    button.classList.remove('btn-historical-active');
+                    button.classList.add('btn-secondary');
+                }
+            });
+        }
+
 
         // --- Event Listeners ---
 
@@ -738,7 +834,11 @@
             await initializePortfolio();
             // Fetch initial data
             fetchPortfolioOverview();
-            fetchTransactionsHistory();
+
+            // Fetch and store all transactions initially, then display 'All' by default
+            await fetchAndStoreAllTransactions();
+            filterAndDisplayTransactions('all'); // Default to showing all transactions
+            setActiveTransactionButton('transactionsAllBtn'); // Highlight the 'All' button
 
             // Set default trade date to today
             const today = new Date();
@@ -747,27 +847,13 @@
             // Stock Data Section
             document.getElementById('fetchStockDataBtn').addEventListener('click', () => {
                 const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 30); // Default to 30 days for historical data
+                fetchStockData(symbol);
             });
 
             document.getElementById('stockSymbolInput').addEventListener('keypress', (event) => {
                 if (event.key === 'Enter') {
                     document.getElementById('fetchStockDataBtn').click();
                 }
-            });
-
-            // Historical data buttons
-            document.getElementById('history7DaysBtn').addEventListener('click', () => {
-                const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 7); // Pass 7 days limit
-            });
-            document.getElementById('history1MonthBtn').addEventListener('click', () => {
-                const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 30); // Pass 30 days limit
-            });
-            document.getElementById('history2MonthsBtn').addEventListener('click', () => {
-                const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
-                fetchStockData(symbol, 60); // Pass 60 days limit
             });
 
             // Event listener for trade date change
@@ -792,7 +878,7 @@
                         const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
                         document.getElementById('tradePrice').value = currentPrice || '';
                         if (!currentPrice) {
-                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`); // Shorter message
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`);
                         }
                     }
                 }
@@ -819,7 +905,7 @@
                         const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
                         document.getElementById('tradePrice').value = currentPrice || '';
                         if (!currentPrice) {
-                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`); // Shorter message
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`);
                         }
                     }
                 }
@@ -830,8 +916,26 @@
             document.getElementById('buyStockBtn').addEventListener('click', buyStock);
             document.getElementById('sellStockBtn').addEventListener('click', sellStock);
 
-            // Fetch a default stock data on load for immediate display
-            fetchStockData('AAPL', 30); // Example: Apple Inc.
+            // Transaction History Buttons
+            document.getElementById('transactionsTodayBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('today');
+                setActiveTransactionButton('transactionsTodayBtn');
+            });
+            document.getElementById('transactions7DaysBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('7D');
+                setActiveTransactionButton('transactions7DaysBtn');
+            });
+            document.getElementById('transactions1MonthBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('1M');
+                setActiveTransactionButton('transactions1MonthBtn');
+            });
+            document.getElementById('transactionsAllBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('all');
+                setActiveTransactionButton('transactionsAllBtn');
+            });
+
+            // Fetch a default stock data on load for immediate display (e.g., AAPL, now always 1 Month)
+            fetchStockData('AAPL');
         });
     </script>
 </body>
