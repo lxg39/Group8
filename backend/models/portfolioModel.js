@@ -42,6 +42,15 @@ const getTransactionsByPortfolioId = async (portfolioId) => {
     return rows;
 };
 
+
+// New: Function to delete a transaction by ID
+const deleteTransaction = async (transactionId) => {
+    await pool.execute(
+        'DELETE FROM transactions WHERE id = ?',
+        [transactionId]
+    );
+};
+
 const getAllTransactions = async () => {
   const [rows] = await pool.execute('SELECT id, symbol, type, quantity, price, transaction_date FROM transactions ORDER BY transaction_date DESC');
   return rows;
@@ -123,4 +132,5 @@ module.exports = {
     deleteStockHolding,
     getAllStockHoldings,
     getPortfolioHistoricalValue,
+    deleteTransaction,
 };
