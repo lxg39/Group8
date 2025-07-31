@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Stock Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1rem; /* p-4 */
+            /* margin-bottom: 1rem; */ /* mb-4 - removed as parent gap will handle spacing */
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container {
+            flex-grow: 1; /* Allow chart to take available space */
+            position: relative;
+            min-height: 200px; /* Adjusted minimum height for charts */
+        }
+        .btn-primary {
+            /* 调整 query 按钮颜色，使其更清晰 */
+            @apply bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800 transition duration-200 ease-in-out text-sm;
+        }
+        /* 修改 Buy 和 Sell 按钮的样式 */
+        .btn-buy {
+            @apply bg-blue-200 text-blue-900 px-4 py-2 rounded-md hover:bg-blue-300 transition duration-200 ease-in-out text-sm font-semibold; /* 加粗文字 */
+        }
+        .btn-sell {
+            @apply bg-red-200 text-red-900 px-4 py-2 rounded-md hover:bg-red-300 transition duration-200 ease-in-out text-sm font-semibold; /* 加粗文字 */
+        }
+
+        .btn-secondary {
+            /* 修改 Today, 7 Days, 1 Month, All 按钮的非活跃颜色 */
+            @apply bg-gray-100 text-gray-700 px-3 py-1 rounded-md hover:bg-gray-200 transition duration-200 ease-in-out text-sm;
+        }
+        .btn-historical-active {
+            /* 修改 Today, 7 Days, 1 Month, All 按钮的活跃颜色 */
+            @apply bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition duration-200 ease-in-out text-sm;
+        }
+        .input-field {
+            @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm; /* Smaller text for inputs */
+        }
+        /* Custom scrollbar for tables */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Adjust table cell padding and font for larger text */
+        .min-w-full th {
+            padding-top: 0.75rem; /* py-3 */
+            padding-bottom: 0.75rem; /* py-3 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .min-w-full td {
+            padding-top: 0.625rem; /* py-2.5 */
+            padding-bottom: 0.625rem; /* py-2.5 */
+            padding-left: 1rem; /* px-4 */
+            padding-right: 1rem; /* px-4 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        /* For images and names at the bottom */
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .team-member img {
+            width: 80px; /* 加大图片尺寸 */
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem; /* 增加与名字的距离 */
+            border: 3px solid #cbd5e1; /* 稍微粗一点的边框 */
+        }
+        .team-member p {
+            font-size: 1rem; /* 调整名字的字体大小 */
+            font-weight: 600; /* semi-bold */
+            color: #374151; /* gray-800 */
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Personal Stock Portfolio Management</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <div class="lg:col-span-1 lg:row-span-3 flex flex-col gap-4">
+                <div class="card h-full"> <h2 class="text-xl font-semibold text-gray-700 mb-3">Stock Info & History</h2>
+                    <div class="flex items-center space-x-3 mb-3">
+                        <input type="text" id="stockSymbolInput" placeholder="Enter stock symbol (e.g., AAPL)" class="input-field flex-grow">
+                        <button id="fetchStockDataBtn" class="btn-primary">Query</button>
+                    </div>
+
+                    <div id="currentStockInfo" class="mb-3 bg-gray-50 p-3 rounded-lg shadow-sm hidden">
+                        <p class="text-base font-semibold text-gray-800 mb-1" id="currentStockName"></p>
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-1">
+                            <p class="text-xl font-bold text-gray-900" id="currentStockPrice"></p>
+                            <p class="text-sm text-gray-600" id="currentStockChange"></p>
+                        </div>
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
+                            <p class="text-gray-600" id="currentStockVolume"></p>
+                            <p class="text-gray-600" id="currentMarketStatus"></p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Historical Price Trend (1 Month)</h3> <div class="chart-container">
+                        <canvas id="stockHistoricalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 flex flex-col gap-4">
+
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-3">Portfolio Overview</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3"> <div class="bg-blue-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Cash Balance</p>
+                            <p id="cashBalance" class="text-xl font-bold text-blue-800 break-all">$0.00</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Stock Value</p>
+                            <p id="totalValue" class="text-xl font-bold text-green-800 break-all">$0.00</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-600">Total Asset</p>
+                            <p id="initialCash" class="text-xl font-bold text-purple-800 break-all">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="card col-span-1">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-3">Trade Stocks</h2>
+                        <div class="grid grid-cols-1 gap-3 mb-3"> <div>
+                                <label for="tradeSymbol" class="block text-xs font-medium text-gray-700 mb-1">Symbol</label>
+                                <input type="text" id="tradeSymbol" placeholder="e.g., AAPL" class="input-field w-full">
+                            </div>
+                            <div>
+                                <label for="tradeQuantity" class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                                <input type="number" id="tradeQuantity" placeholder="Quantity" class="input-field w-full min-w-0">
+                            </div>
+                            <div> <label for="tradePrice" class="block text-xs font-medium text-gray-700 mb-1">Price</label>
+                                <input type="number" id="tradePrice" placeholder="Price" step="0.01" class="input-field w-full min-w-0">
+                            </div>
+                            <div>
+                                <label for="tradeDate" class="block text-xs font-medium text-gray-700 mb-1">Trade Date</label>
+                                <input type="date" id="tradeDate" class="input-field w-full">
+                            </div>
+                        </div>
+                        <div class="flex space-x-3 mt-auto"> <button id="buyStockBtn" class="btn-buy flex-grow">Buy</button>
+                            <button id="sellStockBtn" class="btn-sell flex-grow">Sell</button>
+                        </div>
+                        <p id="tradeMessage" class="mt-3 text-center text-xs font-medium"></p>
+                    </div>
+
+                    <div class="card col-span-1">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-3">Investment Allocation</h3>
+                        <div class="chart-container">
+                            <canvas id="investmentAllocationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Stock Holdings</h3>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="min-w-full bg-white rounded-lg shadow-sm">
+                            <thead>
+                                <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
+                                    <th class="py-2 px-3">Symbol</th>
+                                    <th class="py-2 px-3">Quantity</th>
+                                    <th class="py-2 px-3">Purchase Price</th>
+                                    <th class="py-2 px-3">Current Price</th>
+                                    <th class="py-2 px-3">Market Value</th>
+                                    <th class="py-2 px-3">P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockHoldingsTableBody" class="text-gray-700 text-xs font-light">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div> <div class="card mt-4">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Transaction History</h2>
+            <div class="flex space-x-2 mb-3">
+                <button id="transactionsTodayBtn" class="btn-secondary transaction-period-btn">Today</button>
+                <button id="transactions7DaysBtn" class="btn-secondary transaction-period-btn">7 Days</button>
+                <button id="transactions1MonthBtn" class="btn-secondary transaction-period-btn">1 Month</button>
+                <button id="transactionsAllBtn" class="btn-historical-active transaction-period-btn">All</button>
+            </div>
+            <div class="overflow-x-auto flex-grow">
+                <table class="min-w-full bg-white rounded-lg shadow-sm">
+                    <thead>
+                        <tr class="bg-gray-100 text-left text-gray-600 uppercase text-xs leading-normal">
+                            <th class="py-2 px-3">Date</th>
+                            <th class="py-2 px-3">Symbol</th>
+                            <th class="py-2 px-3">Type</th>
+                            <th class="py-2 px-3">Qty</th>
+                            <th class="py-2 px-3">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionHistoryTableBody" class="text-gray-700 text-xs font-light">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div> <div class="max-w-7xl mx-auto flex justify-evenly items-center py-3 mt-6 mb-4"> <div class="team-member">
+            <img src="img/Eloise.jpg" alt="Avatar A">
+            <p>Eloise Ma</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Eric.jpg" alt="Avatar B">
+            <p>Eric Yao</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Melody.png" alt="Avatar C">
+            <p>Melody Liu</p>
+        </div>
+        <div class="team-member">
+            <img src="img/Bling.jpg" alt="Avatar D">
+            <p>Jing Jing Shang</p>
+        </div>
+    </div>
+    <script>
+        // Base URL for API calls
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // Chart instances
+        let stockHistoricalChart;
+        let investmentAllocationChart;
+
+        // Global variable to store ALL fetched transactions for client-side filtering
+        let allTransactions = [];
+
+        // Utility function to format currency
+        const formatCurrency = (value) => {
+            // Ensure value is a number before formatting, by stripping non-numeric characters (except decimal and sign)
+            const numValue = parseFloat(String(value).replace(/[^0-9.-]+/g,""));
+            if (isNaN(numValue)) return value; // Return original if not a valid number
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(numValue);
+        };
+
+        // Utility function to format date
+        const formatDate = (dateString) => {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options); // Changed to en-US for display
+        };
+
+        // Utility function to get YYYY-MM-DD format for date input
+        const getFormattedDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        // --- Portfolio Functions ---
+
+        // Initializes the portfolio if it doesn't exist
+        async function initializePortfolio() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/portfolio/initialize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ initialCash: 10000.00 }), // Default initial cash
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    // If portfolio already exists, the backend might return 500 or specific message
+                    // We can choose to ignore if it's an "already initialized" error
+                    if (data.message && data.message.includes('already initialized')) {
+                        console.warn('Portfolio already initialized.');
+                    } else {
+                        throw new Error(data.message || 'Failed to initialize portfolio');
+                    }
+                } else {
+                    console.log('Portfolio initialized:', data);
+                }
+            } catch (error) {
+                console.error('Error initializing portfolio:', error);
+                // Do not throw, as it might already be initialized from a previous run
+            }
+        }
+
+
+        // Fetches and displays portfolio overview
+        async function fetchPortfolioOverview() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/portfolio`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 计算所有股票持仓的市场总值
+                    let totalStockMarketValue = 0;
+                    if (data.holdings && data.holdings.length > 0) {
+                        totalStockMarketValue = data.holdings.reduce((sum, holding) => sum + holding.marketValue, 0);
+                    }
+
+                    // 更新 Cash Balance (现金余额) - 保持不变
+                    document.getElementById('cashBalance').textContent = formatCurrency(data.cash_balance);
+
+                    // 更新 Stock Value (股票总价值) 为所有股票的市场总值
+                    document.getElementById('totalValue').textContent = formatCurrency(totalStockMarketValue);
+
+                    // 更新 Total Asset (总资产) 为当前现金余额 + 所有股票的市场总值 (即当前投资组合总值)
+                    const currentPortfolioTotalValue = Number(data.cash_balance) + Number(totalStockMarketValue);
+                    document.getElementById('initialCash').textContent = formatCurrency(currentPortfolioTotalValue);
+
+                    // Update stock holdings table
+                    const holdingsTableBody = document.getElementById('stockHoldingsTableBody');
+                    holdingsTableBody.innerHTML = ''; // Clear previous data
+                    if (data.holdings && data.holdings.length > 0) {
+                        data.holdings.forEach(holding => {
+                            const row = holdingsTableBody.insertRow();
+                            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                            row.innerHTML = `
+                                <td class="py-2 px-3 text-left font-medium">${holding.symbol}</td>
+                                <td class="py-2 px-3 text-left">${holding.quantity}</td>
+                                <td class="py-2 px-3 text-left">${formatCurrency(holding.purchasePrice)}</td>
+                                <td class="py-2 px-3 text-left">${formatCurrency(holding.currentPrice)}</td>
+                                <td class="py-2 px-3 text-left">${formatCurrency(holding.marketValue)}</td>
+                                <td class="py-2 px-3 text-left ${holding.profit_loss >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(holding.profit_loss)}</td>
+                            `;
+                        });
+                    } else {
+                        holdingsTableBody.innerHTML = `<tr><td colspan="6" class="py-2 px-3 text-center text-gray-500">No stock holdings</td></tr>`;
+                    }
+
+                    // Render investment allocation pie chart
+                    renderInvestmentAllocationChart(data.investmentAllocation);
+                } else {
+                    console.error('Error fetching portfolio:', data.message);
+                    // If portfolio not found, try to initialize it
+                    if (response.status === 404) {
+                        await initializePortfolio();
+                        await fetchPortfolioOverview(); // Try fetching again after initialization
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching portfolio overview:', error);
+            }
+        }
+
+        // Renders the investment allocation pie chart
+        function renderInvestmentAllocationChart(allocationData) {
+            const ctx = document.getElementById('investmentAllocationChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (investmentAllocationChart) {
+                investmentAllocationChart.destroy();
+            }
+
+            console.log('Investment Allocation Data received:', allocationData); // Debug log
+
+            if (!allocationData || allocationData.length === 0 || allocationData.every(item => item.value === 0)) {
+                console.warn('No valid investment allocation data to display for the pie chart.');
+                // Display a message on the canvas itself
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear canvas
+                ctx.font = '16px Inter';
+                ctx.fillStyle = '#6b7280'; // gray-500
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle'; // Center vertically
+                ctx.fillText('No investment allocation data', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return; // Exit if no data
+            }
+
+            const labels = allocationData.map(item => item.symbol);
+            const values = allocationData.map(item => item.value);
+            const percentages = allocationData.map(item => item.percentage.toFixed(2) + '%');
+
+            // 莫兰迪色系
+            const morandiColors = [
+                '#B0C4DE', // Light Steel Blue
+                '#ADD8E6', // Light Blue
+                '#98FB98', // Pale Green
+                '#F0E68C', // Khaki
+                '#FFC0CB', // Pink
+                '#DDA0DD', // Plum
+                '#C8A2C8', // Thistle
+                '#DAA520', // Goldenrod
+                '#E6E6FA', // Lavender
+                '#F5DEB3'  // Wheat
+            ];
+
+            investmentAllocationChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: morandiColors.slice(0, labels.length),
+                        borderColor: morandiColors.slice(0, labels.length).map(color => {
+                            // Slightly darker border for contrast
+                            const r = parseInt(color.slice(1, 3), 16);
+                            const g = parseInt(color.slice(3, 5), 16);
+                            const b = parseInt(color.slice(5, 7), 16);
+                            return `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 30)}, ${Math.max(0, b - 30)})`;
+                        }),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += formatCurrency(context.parsed) + ' (' + percentages[context.dataIndex] + ')';
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#fff',
+                            formatter: (value, context) => {
+                                return percentages[context.dataIndex];
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels] // Register the datalabels plugin
+            });
+        }
+
+        // --- Stock Data Functions ---
+
+        // Fetches and displays current stock data and historical data
+        async function fetchStockData(symbol) { // Removed period parameter as it's now fixed to 1M
+            if (!symbol) {
+                alert('Please enter a stock symbol!');
+                return;
+            }
+
+            const currentStockInfoDiv = document.getElementById('currentStockInfo');
+            const currentStockName = document.getElementById('currentStockName');
+            const currentStockPrice = document.getElementById('currentStockPrice');
+            const currentStockChange = document.getElementById('currentStockChange');
+            const currentStockVolume = document.getElementById('currentStockVolume');
+            const currentMarketStatus = document.getElementById('currentMarketStatus');
+
+
+            try {
+                // Fetch current data
+                console.log(`Fetching real-time data for: ${symbol}`);
+                const currentResponse = await fetch(`${API_BASE_URL}/real-time/${symbol}`);
+                console.log('Real-time API Response:', currentResponse); // Log raw response
+                const currentData = await currentResponse.json();
+                console.log('Real-time API Data:', currentData); // Log parsed data
+
+                let dataToDisplay = {}; // Initialize to an empty object
+
+                if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
+                    dataToDisplay = currentData.primaryData;
+                } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
+                    dataToDisplay = currentData.secondaryData;
+                }
+
+
+                if (currentResponse.ok && Object.keys(dataToDisplay).length > 0) { // Check if dataToDisplay has properties
+                    currentStockInfoDiv.classList.remove('hidden');
+
+                    currentStockName.textContent = currentData.companyName || currentData.symbol || 'N/A';
+                    currentStockPrice.textContent = dataToDisplay.lastSalePrice ? formatCurrency(dataToDisplay.lastSalePrice) : 'N/A';
+
+                    const netChangeNum = parseFloat(dataToDisplay.netChange);
+                    const changeClass = netChangeNum > 0 ? 'text-green-600' : (netChangeNum < 0 ? 'text-red-600' : 'text-gray-600');
+
+                    currentStockChange.textContent = `Change: ${dataToDisplay.netChange || 'N/A'} (${dataToDisplay.percentageChange || 'N/A'})`;
+                    currentStockChange.className = `text-sm ${changeClass}`;
+
+                    currentStockVolume.textContent = `Volume: ${dataToDisplay.volume || 'N/A'}`;
+                    currentMarketStatus.textContent = `Market Status: ${currentData.marketStatus || 'N/A'}`;
+
+
+                    // Auto-fill trade price, parsing the currency string to a number
+                    const tradePriceValue = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
+                    document.getElementById('tradeSymbol').value = symbol;
+                    document.getElementById('tradePrice').value = tradePriceValue;
+
+                } else {
+                    currentStockInfoDiv.classList.add('hidden');
+                    console.error('Error fetching current stock data: No valid data to display or API response not OK.', currentData.message || 'Unknown error', 'Data received:', currentData);
+                    alert(`Unable to fetch real-time data for ${symbol}.`);
+                }
+
+                // Fetch historical data (always '1M' as per new requirement)
+                console.log(`Fetching historical data for: ${symbol}, period: 1M (default)`);
+                const historicalResponse = await fetch(`${API_BASE_URL}/historical/${symbol}?period=1M`); // Always request 1M
+                console.log('Historical API Response:', historicalResponse); // Log raw response
+                const historicalData = await historicalResponse.json();
+                console.log('Historical API Data:', historicalData); // Log parsed data
+
+                if (historicalResponse.ok && historicalData && historicalData.length > 0) { // Check for array length
+                    renderStockHistoricalChart(historicalData, symbol); // Pass the array directly
+                } else {
+                    console.error('Error fetching historical stock data:', historicalData.message || 'Unknown error');
+                    alert(`Unable to fetch historical data for ${symbol} for 1 Month.`);
+                }
+
+            } catch (error) {
+                console.error('Error fetching stock data:', error);
+                alert('Error fetching stock data. Check symbol or try again.');
+            }
+        }
+
+        // New function to fetch historical price for a specific date
+        async function getHistoricalPriceForDate(symbol, dateString) {
+            try {
+                // For trade date price, we will fetch '1m' and filter locally to ensure enough data coverage
+                const response = await fetch(`${API_BASE_URL}/historical/${symbol}?period=1M`);
+                const historicalData = await response.json();
+
+                if (response.ok && historicalData && historicalData.length > 0) {
+                    const targetDate = new Date(dateString);
+                    // Find the data for the exact date or the closest preceding date
+                    const dataForDate = historicalData.find(p => {
+                        const pDate = new Date(p.timestamp_unix * 1000); // Convert Unix timestamp (seconds) to Date
+                        return pDate.toDateString() === targetDate.toDateString();
+                    });
+
+                    if (dataForDate && dataForDate.close !== null) {
+                        return parseFloat(dataForDate.close);
+                    } else {
+                        console.warn(`No historical close price found for ${symbol} on ${dateString}.`);
+                        return null; // No specific historical price for this date
+                    }
+                } else {
+                    console.error(`Failed to fetch historical data for ${symbol} for date ${dateString}.`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`Error fetching historical price for ${symbol} on ${dateString}:`, error);
+                return null;
+            }
+        }
+
+
+        // Renders the stock historical line chart
+        function renderStockHistoricalChart(prices, symbol) {
+            const ctx = document.getElementById('stockHistoricalChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (stockHistoricalChart) {
+                stockHistoricalChart.destroy();
+            }
+
+            // Filter out data points with null or zero closing prices and ensure timestamp_unix exists
+            const validPrices = prices.filter(p => p.close !== null && p.close !== 0 && p.timestamp_unix);
+
+            // Sort data by timestamp_unix to ensure correct line chart rendering
+            const sortedPrices = validPrices.sort((a, b) => a.timestamp_unix - b.timestamp_unix);
+
+            const labels = sortedPrices.map(p => formatDate(new Date(p.timestamp_unix * 1000))); // Convert Unix timestamp (seconds) to Date
+            const data = sortedPrices.map(p => p.close);
+
+            stockHistoricalChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${symbol} Historical Price`, // Shorter label
+                        data: data,
+                        borderColor: '#10B981', // Green-500
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)', // Light green
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#10B981',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#10B981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                                }
+                            }
+                        },
+                        datalabels: { // Added datalabels plugin for charts
+                            display: false, // Usually not desired for line charts
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels] // Register the datalabels plugin
+            });
+        }
+
+        // --- Trade Functions ---
+
+        // Handles buying stock
+        async function buyStock() {
+            const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+            const quantity = parseInt(document.getElementById('tradeQuantity').value);
+            const price = parseFloat(document.getElementById('tradePrice').value);
+            const tradeDate = document.getElementById('tradeDate').value; // Get the selected date
+            const tradeMessage = document.getElementById('tradeMessage');
+
+            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0 || !tradeDate) {
+                tradeMessage.textContent = 'Please enter valid stock symbol, quantity, price, and trade date.'; // Shorter message
+                tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/portfolio/buy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symbol, quantity, price, transactionDate: tradeDate }), // Pass transactionDate
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    tradeMessage.textContent = `Bought ${quantity} ${symbol}. New cash: ${formatCurrency(data.newCashBalance)}`; // Shorter message
+                    tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
+                    // Refresh portfolio and transactions
+                    fetchPortfolioOverview();
+                    // After a trade, re-fetch all transactions and then display the default view
+                    await fetchAndStoreAllTransactions();
+                    filterAndDisplayTransactions('all'); // Display 'All' transactions after a trade
+                    setActiveTransactionButton('transactionsAllBtn');
+                } else {
+                    tradeMessage.textContent = `Buy failed: ${data.message || 'Unknown error'}`; // Shorter message
+                    tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                }
+            } catch (error) {
+                console.error('Error buying stock:', error);
+                tradeMessage.textContent = 'Error buying stock.'; // Shorter message
+                tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+            }
+        }
+
+        // Handles selling stock
+        async function sellStock() {
+            const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+            const quantity = parseInt(document.getElementById('tradeQuantity').value);
+            const price = parseFloat(document.getElementById('tradePrice').value);
+            const tradeDate = document.getElementById('tradeDate').value; // Get the selected date
+            const tradeMessage = document.getElementById('tradeMessage');
+
+            if (!symbol || isNaN(quantity) || quantity <= 0 || isNaN(price) || price <= 0 || !tradeDate) {
+                tradeMessage.textContent = 'Please enter valid stock symbol, quantity, price, and trade date.'; // Shorter message
+                tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/portfolio/sell`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symbol, quantity, price, transactionDate: tradeDate }), // Pass transactionDate
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    tradeMessage.textContent = `Sold ${quantity} ${symbol}. New cash: ${formatCurrency(data.newCashBalance)}`; // Shorter message
+                    tradeMessage.className = 'mt-4 text-center text-sm font-medium text-green-600';
+                    // Refresh portfolio and transactions
+                    fetchPortfolioOverview();
+                    // After a trade, re-fetch all transactions and then display the default view
+                    await fetchAndStoreAllTransactions();
+                    filterAndDisplayTransactions('all'); // Display 'All' transactions after a trade
+                    setActiveTransactionButton('transactionsAllBtn');
+                } else {
+                    tradeMessage.textContent = `Sell failed: ${data.message || 'Unknown error'}`; // Shorter message
+                    tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+                }
+            } catch (error) {
+                console.error('Error selling stock:', error);
+                tradeMessage.textContent = 'Error selling stock.'; // Shorter message
+                tradeMessage.className = 'mt-4 text-center text-sm font-medium text-red-600';
+            }
+        }
+
+        // Fetches ALL transaction history and stores it in allTransactions array
+        async function fetchAndStoreAllTransactions() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/portfolio/transactions`);
+                const data = await response.json();
+
+                if (response.ok && data) {
+                    allTransactions = data; // Store all transactions
+                } else {
+                    allTransactions = []; // Clear if error or no data
+                    console.error('Error fetching all transaction history:', data.message || 'Unknown error');
+                }
+            } catch (error) {
+                allTransactions = []; // Clear if error
+                console.error('Error fetching all transaction history:', error);
+            }
+        }
+
+        // Filters and displays transactions based on the period
+        function filterAndDisplayTransactions(period) {
+            const transactionHistoryTableBody = document.getElementById('transactionHistoryTableBody');
+            transactionHistoryTableBody.innerHTML = ''; // Clear previous data
+
+            let filteredTransactions = [];
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Normalize 'now' to start of day
+
+            if (allTransactions && allTransactions.length > 0) {
+                filteredTransactions = allTransactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.transaction_date);
+                    transactionDate.setHours(0, 0, 0, 0); // Normalize transaction date to start of day
+
+                    switch (period) {
+                        case 'today':
+                            return transactionDate.getTime() === now.getTime();
+                        case '7D':
+                            const sevenDaysAgo = new Date(now);
+                            sevenDaysAgo.setDate(now.getDate() - 7);
+                            return transactionDate.getTime() >= sevenDaysAgo.getTime() && transactionDate.getTime() <= now.getTime();
+                        case '1M':
+                            const oneMonthAgo = new Date(now);
+                            oneMonthAgo.setMonth(now.getMonth() - 1);
+                            return transactionDate.getTime() >= oneMonthAgo.getTime() && transactionDate.getTime() <= now.getTime();
+                        case 'all':
+                        default:
+                            return true; // No filter, return all
+                    }
+                });
+
+                // Sort filtered transactions by date descending (newest first)
+                filteredTransactions.sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date));
+
+                // Optionally, limit to latest 10 of the filtered results (keeping this commented out to show all filtered)
+                // const transactionsToDisplay = filteredTransactions.slice(0, 10);
+                const transactionsToDisplay = filteredTransactions; // Display all filtered transactions
+
+                if (transactionsToDisplay.length > 0) {
+                    transactionsToDisplay.forEach(transaction => {
+                        const row = transactionHistoryTableBody.insertRow();
+                        row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                        row.innerHTML = `
+                            <td class="py-2 px-3 text-left">${formatDate(transaction.transaction_date)}</td>
+                            <td class="py-2 px-3 text-left">${transaction.symbol}</td>
+                            <td class="py-2 px-3 text-left ${transaction.type === 'buy' ? 'text-red-600' : 'text-green-600'}">${transaction.type === 'buy' ? 'Buy' : 'Sell'}</td>
+                            <td class="py-2 px-3 text-left">${transaction.quantity}</td>
+                            <td class="py-2 px-3 text-left">${formatCurrency(transaction.price)}</td>
+                        `;
+                    });
+                } else {
+                    transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history for this period</td></tr>`;
+                }
+            } else {
+                 transactionHistoryTableBody.innerHTML = `<tr><td colspan="5" class="py-2 px-3 text-center text-gray-500">No transaction history available</td></tr>`;
+            }
+        }
+
+        // Helper function to set active button for transaction history
+        function setActiveTransactionButton(activeButtonId) {
+            const buttons = document.querySelectorAll('.transaction-period-btn');
+            buttons.forEach(button => {
+                if (button.id === activeButtonId) {
+                    button.classList.add('btn-historical-active');
+                    button.classList.remove('btn-secondary');
+                } else {
+                    button.classList.remove('btn-historical-active');
+                    button.classList.add('btn-secondary');
+                }
+            });
+        }
+
+
+        // --- Event Listeners ---
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize portfolio on page load (if not already)
+            await initializePortfolio();
+            // Fetch initial data
+            fetchPortfolioOverview();
+
+            // Fetch and store all transactions initially, then display 'All' by default
+            await fetchAndStoreAllTransactions();
+            filterAndDisplayTransactions('all'); // Default to showing all transactions
+            setActiveTransactionButton('transactionsAllBtn'); // Highlight the 'All' button
+
+            // Set default trade date to today
+            const today = new Date();
+            document.getElementById('tradeDate').value = getFormattedDate(today);
+
+            // Stock Data Section
+            document.getElementById('fetchStockDataBtn').addEventListener('click', () => {
+                const symbol = document.getElementById('stockSymbolInput').value.toUpperCase();
+                fetchStockData(symbol);
+            });
+
+            document.getElementById('stockSymbolInput').addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    document.getElementById('fetchStockDataBtn').click();
+                }
+            });
+
+            // Event listener for trade date change
+            document.getElementById('tradeDate').addEventListener('change', async () => {
+                const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+                const selectedDate = document.getElementById('tradeDate').value;
+
+                if (symbol && selectedDate) {
+                    const historicalPrice = await getHistoricalPriceForDate(symbol, selectedDate);
+                    if (historicalPrice !== null) {
+                        document.getElementById('tradePrice').value = historicalPrice.toFixed(2);
+                    } else {
+                        // If historical price not found, try to get current price as fallback
+                        const currentResponse = await fetch(`${API_BASE_URL}/real-time/${symbol}`);
+                        const currentData = await currentResponse.json();
+                        let dataToDisplay = {};
+                        if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
+                            dataToDisplay = currentData.primaryData;
+                        } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
+                            dataToDisplay = currentData.secondaryData;
+                        }
+                        const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
+                        document.getElementById('tradePrice').value = currentPrice || '';
+                        if (!currentPrice) {
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`);
+                        }
+                    }
+                }
+            });
+
+            // Event listener for trade symbol change to update price for selected date
+            document.getElementById('tradeSymbol').addEventListener('change', async () => {
+                const symbol = document.getElementById('tradeSymbol').value.toUpperCase();
+                const selectedDate = document.getElementById('tradeDate').value;
+                if (symbol && selectedDate) {
+                    const historicalPrice = await getHistoricalPriceForDate(symbol, selectedDate);
+                    if (historicalPrice !== null) {
+                        document.getElementById('tradePrice').value = historicalPrice.toFixed(2);
+                    } else {
+                        // If historical price not found, try to get current price as fallback
+                        const currentResponse = await fetch(`${API_BASE_URL}/real-time/${symbol}`);
+                        const currentData = await currentResponse.json();
+                        let dataToDisplay = {};
+                        if (currentData && currentData.primaryData && Object.keys(currentData.primaryData).length > 0) {
+                            dataToDisplay = currentData.primaryData;
+                        } else if (currentData && currentData.secondaryData && Object.keys(currentData.secondaryData).length > 0) {
+                            dataToDisplay = currentData.secondaryData;
+                        }
+                        const currentPrice = dataToDisplay.lastSalePrice ? parseFloat(String(dataToDisplay.lastSalePrice).replace(/[^0-9.-]+/g,"")) : '';
+                        document.getElementById('tradePrice').value = currentPrice || '';
+                        if (!currentPrice) {
+                            alert(`Could not get price for ${symbol} on ${selectedDate}, and no real-time price available.`);
+                        }
+                    }
+                }
+            });
+
+
+            // Buy/Sell Stock Section
+            document.getElementById('buyStockBtn').addEventListener('click', buyStock);
+            document.getElementById('sellStockBtn').addEventListener('click', sellStock);
+
+            // Transaction History Buttons
+            document.getElementById('transactionsTodayBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('today');
+                setActiveTransactionButton('transactionsTodayBtn');
+            });
+            document.getElementById('transactions7DaysBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('7D');
+                setActiveTransactionButton('transactions7DaysBtn');
+            });
+            document.getElementById('transactions1MonthBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('1M');
+                setActiveTransactionButton('transactions1MonthBtn');
+            });
+            document.getElementById('transactionsAllBtn').addEventListener('click', () => {
+                filterAndDisplayTransactions('all');
+                setActiveTransactionButton('transactionsAllBtn');
+            });
+
+            // Fetch a default stock data on load for immediate display (e.g., AAPL, now always 1 Month)
+            fetchStockData('AAPL');
+        });
+    </script>
+</body>
+</html>
