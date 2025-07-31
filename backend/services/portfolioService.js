@@ -96,20 +96,18 @@ const getPortfolioOverview = async () => {
 
     for (const holding of holdings) {
       const currentDataResponse = currentDataArray.find((data) => {
-        // 根据您之前提供的日志，查找匹配的股票数据
-        // 实时数据结构为 { symbol: 'AAPL', primaryData: { lastSalePrice: '$211.27', ... }, ... }
+        // real-time data struc: { symbol: 'AAPL', primaryData: { lastSalePrice: '$211.27', ... }, ... }
         return data && data.symbol === holding.stock_symbol;
       });
 
       let currentPrice = 0;
       if (currentDataResponse) {
-        // 优先使用 primaryData，如果 primaryData 不可用，则尝试 secondaryData
+        // use primaryData first，if primaryData can't use，then try secondaryData
         const priceData = currentDataResponse.primaryData || currentDataResponse.secondaryData;
 
         if (priceData && priceData.lastSalePrice) {
-          // 移除货币符号并转换为浮点数
           currentPrice = parseFloat(priceData.lastSalePrice.replace(/[^0-9.-]+/g, ""));
-          // 如果解析结果为 NaN，则回退到数据库中存储的 current_price
+
           if (isNaN(currentPrice)) {
             console.warn(`Could not parse price for ${holding.stock_symbol}: ${priceData.lastSalePrice}. Using stored price.`);
             currentPrice = holding.current_price || 0;
@@ -123,7 +121,7 @@ const getPortfolioOverview = async () => {
         currentPrice = holding.current_price || 0;
       }
 
-      // 确保 currentPrice 是一个有效的数字
+      // make sure currentPrice is a valid number
       if (isNaN(currentPrice)) {
         currentPrice = 0;
       }
@@ -132,13 +130,12 @@ const getPortfolioOverview = async () => {
       totalStockValue += marketValue;
 
       // Update current_price in DB if it has changed
-      // 确保比较的是数字
       if (parseFloat(holding.current_price) !== currentPrice) {
         await portfolioModel.updateStockHolding(
           holding.stock_symbol,
           holding.quantity,
           holding.purchase_price,
-          currentPrice // 确保这里传入的是数字
+          currentPrice 
         );
         holding.current_price = currentPrice; // Update the object for immediate use
       }
@@ -146,7 +143,7 @@ const getPortfolioOverview = async () => {
       holdingsWithCurrentData.push({
         symbol: holding.stock_symbol,
         quantity: holding.quantity,
-        purchasePrice: holding.purchase_price, // 假设这里从DB取出的已经是数字
+        purchasePrice: holding.purchase_price,
         currentPrice: currentPrice,
         marketValue: marketValue,
         profit_loss: (currentPrice - holding.purchase_price) * holding.quantity,
@@ -320,6 +317,7 @@ const getTransactionsHistory = async () => {
     return await portfolioModel.getTransactionsByPortfolioId(portfolio.id);
 };
 
+
 const getPortfolioTrendData = async () => {
     const portfolio = await portfolioModel.getPortfolio();
     if (!portfolio) {
@@ -410,6 +408,65 @@ const getPortfolioTrendData = async () => {
     return trendData.sort((a,b) => new Date(a.date) - new Date(b.date));
 };
 
+// New: Function to delete a transaction
+const deleteTransaction = async (transactionId) => {
+    // Before deleting the transaction, you might want to reverse its effect on portfolio cash and holdings.
+    // This is a complex logic that depends on your business rules (e.g., what if the stock was sold later?).
+    // For simplicity, this example only deletes the transaction record.
+    // A robust solution would involve recalculating portfolio state or explicitly reversing the transaction.
+
+    // First, get the transaction details to reverse its effect on cash balance and holdings
+    const [transactions] = await pool.execute(
+        'SELECT * FROM transactions WHERE id = ?',
+        [transactionId]
+    );
+    const transaction = transactions[0];
+
+    if (!transaction) {
+        throw new Error('Transaction not found.');
+    }
+
+    const portfolio = await portfolioModel.getPortfolio();
+    if (!portfolio) {
+        throw new Error('Portfolio not found. Please initialize it.');
+    }
+
+    let newCashBalance = portfolio.cash_balance;
+    let stockHolding = await portfolioModel.getStockHoldingBySymbol(transaction.symbol);
+
+    if (transaction.type === 'buy') {
+        // Reverse a buy: add cash back, reduce holdings
+        newCashBalance += (transaction.quantity * transaction.price);
+        if (stockHolding) {
+            const newQuantity = stockHolding.quantity - transaction.quantity;
+            if (newQuantity <= 0) {
+                await portfolioModel.deleteStockHolding(transaction.symbol);
+            } else {
+                // Simplified: recalculate average purchase price if needed, or keep old for remaining
+                // For now, just update quantity and keep old purchase price for remaining
+                await portfolioModel.updateStockHolding(transaction.symbol, newQuantity, stockHolding.purchase_price, stockHolding.current_price);
+            }
+        }
+    } else if (transaction.type === 'sell') {
+        // Reverse a sell: deduct cash, increase holdings
+        newCashBalance -= (transaction.quantity * transaction.price);
+        if (stockHolding) {
+            await portfolioModel.updateStockHolding(transaction.symbol, stockHolding.quantity + transaction.quantity, stockHolding.purchase_price, stockHolding.current_price);
+        } else {
+            // If selling caused holding to be deleted, re-add it (assuming purchase price is the selling price for reversal)
+            await portfolioModel.addStockHolding(transaction.symbol, transaction.quantity, transaction.price);
+        }
+    }
+
+    // Update portfolio cash balance (total_value will be recalculated on next overview fetch)
+    await portfolioModel.updatePortfolioValue(portfolio.id, newCashBalance, portfolio.total_value);
+
+    // Finally, delete the transaction record
+    await portfolioModel.deleteTransaction(transactionId);
+
+    return { success: true, newCashBalance };
+};
+
 
 module.exports = {
     initializePortfolio,
@@ -418,5 +475,6 @@ module.exports = {
     sellStock,
     getTransactionsHistory,
     getPortfolioTrendData,
+    deleteTransaction,
 };
 

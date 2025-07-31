@@ -1,6 +1,5 @@
 const stockService = require('../services/stockService');
 
-// 获取股票历史价格数据
 const getHistoricalData = async (req, res) => {
   const { symbol } = req.params;
   try {
@@ -15,7 +14,6 @@ const getHistoricalData = async (req, res) => {
   }
 };
 
-// 获取股票当日价格信息
 const getCurrentData = async (req, res) => {
   const { symbol } = req.params;
   try {
@@ -30,7 +28,6 @@ const getCurrentData = async (req, res) => {
   }
 };
 
-// 获取多组股票历史价格数据
 const getMultipleHistoricalData = async (req, res) => {
   const symbols = req.query.symbols.split(',');
   try {
@@ -41,7 +38,6 @@ const getMultipleHistoricalData = async (req, res) => {
   }
 };
 
-// 获取多组股票当日价格
 const getMultipleCurrentData = async (req, res) => {
   const symbols = req.query.symbols.split(',');
   try {

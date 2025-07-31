@@ -66,6 +66,18 @@ const getPortfolioTrend = async (req, res) => {
     }
 };
 
+// New: Delete a transaction by ID
+const deleteTransaction = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await portfolioService.deleteTransaction(id);
+        res.status(200).json({ message: 'Transaction deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting transaction:', err);
+        res.status(500).send(err.message);
+    }
+};
+
 
 module.exports = {
     initializePortfolio,
@@ -74,4 +86,5 @@ module.exports = {
     sellStock,
     getTransactions,
     getPortfolioTrend,
+    deleteTransaction,
 };

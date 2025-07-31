@@ -11,5 +11,7 @@ router.post('/portfolio/buy', portfolioController.buyStock);
 router.post('/portfolio/sell', portfolioController.sellStock);
 router.get('/portfolio/transactions', portfolioController.getTransactions);
 router.get('/portfolio/trend', portfolioController.getPortfolioTrend);
+// New: Delete a transaction by ID
+router.delete('/portfolio/transactions/delete/:id', portfolioController.deleteTransaction);
 
 module.exports = router;
